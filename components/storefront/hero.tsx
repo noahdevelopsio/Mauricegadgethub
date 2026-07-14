@@ -132,7 +132,7 @@ export default function Hero() {
 
           {/* Subcopy details */}
           <p className="text-[#98989D] text-sm md:text-base leading-relaxed max-w-[440px] font-sans font-medium">
-            Phones, gaming consoles, audio and accessories — genuine products, secure checkout, fast delivery across Lagos.
+            Phones, gaming consoles, audio, and accessories. Experience genuine products, secure checkout, and fast delivery across Lagos.
           </p>
 
           {/* Call to Actions CTA */}

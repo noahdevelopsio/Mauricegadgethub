@@ -1,7 +1,42 @@
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import type { Metadata } from "next";
+
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const params = await props.params;
+  const { slug } = params;
+
+  try {
+    const supabase = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    const { data: category } = await supabase
+      .from("categories")
+      .select("name, description")
+      .eq("slug", slug)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (category) {
+      return {
+        title: category.name,
+        description: category.description || `Browse our authentic collection of ${category.name} in Ikeja, Lagos.`,
+      };
+    }
+  } catch (error) {
+    console.error("Error generating category metadata:", error);
+  }
+
+  return {
+    title: "Category",
+  };
+}
 
 interface SearchParams {
   brand?: string;

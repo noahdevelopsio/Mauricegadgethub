@@ -1,3 +1,10 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Our Story",
+  description: "Learn about Maurice Gadgets Hub, our commitment to genuine consumer electronics, authorized supply channels, and secure e-commerce in Ikeja, Lagos.",
+};
+
 export default function AboutPage() {
   return (
     <main className="max-w-4xl mx-auto py-20 px-6 md:px-12">

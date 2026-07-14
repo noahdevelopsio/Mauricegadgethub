@@ -2,6 +2,12 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import Image from "next/image";
 import { Search, SlidersHorizontal } from "lucide-react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "All Gadgets & Premium Consumer Tech",
+  description: "Browse 100% genuine iPhones, Samsung Galaxy phones, PlayStation consoles, audio earbuds, and original chargers. Official store warranty and express delivery in Lagos.",
+};
 
 interface SearchParams {
   category?: string;

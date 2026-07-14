@@ -2,12 +2,44 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { notFound } from "next/navigation";
 import ProductDetails from "@/components/storefront/product-details";
+import type { Metadata } from "next";
 
 // Set dynamic revalidation of pages for ISR (revalidate every 60 seconds)
 export const revalidate = 60;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+  const params = await props.params;
+  const { slug } = params;
+
+  try {
+    const supabase = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    const { data: product } = await supabase
+      .from("products")
+      .select("name, description, meta_title, meta_description")
+      .eq("slug", slug)
+      .eq("status", "published")
+      .maybeSingle();
+
+    if (product) {
+      return {
+        title: product.meta_title || product.name,
+        description: product.meta_description || product.description?.substring(0, 155) || `Buy genuine ${product.name} at Maurice Gadgets Hub in Ikeja, Lagos.`,
+      };
+    }
+  } catch (error) {
+    console.error("Error generating product metadata:", error);
+  }
+
+  return {
+    title: "Product Details",
+  };
 }
 
 export async function generateStaticParams() {

@@ -1,3 +1,10 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "FAQs & Shop Support",
+  description: "Find answers to frequently asked questions about product authenticity, warranty terms, delivery timelines, payment security, and returns at Maurice Gadgets Hub.",
+};
+
 export default function FAQPage() {
   const faqs = [
     {

@@ -1,5 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import ContactForm from "@/components/storefront/contact-form";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Contact & Location",
+  description: "Get in touch with Maurice Gadgets Hub in Ikeja, Lagos. Call, email, or message us on WhatsApp, and find our physical showroom location map.",
+};
 
 export const revalidate = 0; // Always retrieve live settings on contact page
 
@@ -64,7 +70,7 @@ export default async function ContactPage() {
             <div>
               <h3 className="font-sans font-semibold text-xs uppercase tracking-wider text-accent mb-2">Working hours</h3>
               <p className="text-gray-500 text-sm leading-relaxed font-medium">
-                Monday – Saturday: 9:00 AM – 6:00 PM<br />
+                Monday - Saturday: 9:00 AM - 6:00 PM<br />
                 Sunday: Closed
               </p>
             </div>
