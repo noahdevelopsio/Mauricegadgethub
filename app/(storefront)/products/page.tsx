@@ -140,9 +140,9 @@ export default async function ProductsPage(props: {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* FILTERS PANEL */}
-        <aside className="lg:col-span-3 flex flex-col gap-6 font-sans">
-          
+        
+        {/* 1. DESKTOP FILTERS SIDEBAR (Hidden on Mobile) */}
+        <aside className="hidden lg:flex lg:col-span-3 flex-col gap-6 font-sans">
           {/* Active Search indicators */}
           {search && (
             <div className="bg-canvas border border-gray-300 p-5 rounded-2xl">
@@ -250,8 +250,146 @@ export default async function ProductsPage(props: {
               Reset all filters
             </Link>
           )}
-
         </aside>
+
+        {/* 2. MOBILE COLLAPSIBLE FILTERS (Visible only on Mobile/Tablet) */}
+        <div className="lg:hidden col-span-1">
+          <details className="group border border-gray-300/60 bg-paper rounded-2xl shadow-card overflow-hidden">
+            <summary className="p-4 font-semibold text-xs uppercase tracking-wider text-ink cursor-pointer flex justify-between items-center select-none">
+              <span className="flex items-center gap-2">
+                <span>⚙️</span>
+                <span>Filter & Sort Options</span>
+              </span>
+              <span className="text-gray-500 text-[10px] transition-transform duration-200 group-open:rotate-180">▼</span>
+            </summary>
+            
+            <div className="p-6 border-t border-gray-100 flex flex-col gap-6 font-sans text-left">
+              {/* Active Search indicators */}
+              {search && (
+                <div className="bg-canvas border border-gray-300 p-4 rounded-xl">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-500">Active Search:</span>
+                  <div className="font-semibold text-sm text-ink mt-1">"{search}"</div>
+                  <Link href={getFilterUrl({ search: "" })} className="text-xs text-accent hover:text-accent-dark hover:underline font-semibold mt-2 inline-block">
+                    Clear search
+                  </Link>
+                </div>
+              )}
+
+              {/* Categories Filter */}
+              <div>
+                <h4 className="font-sans font-semibold text-xs uppercase tracking-wider text-ink border-b border-gray-100 pb-2 mb-3">
+                  Categories
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    href={getFilterUrl({ category: "" })}
+                    className={`px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+                      !category 
+                        ? "bg-accent border-accent text-white" 
+                        : "bg-canvas border-gray-300/60 text-gray-500 hover:text-ink"
+                    }`}
+                  >
+                    All Categories
+                  </Link>
+                  {categories.map((cat) => (
+                    <Link
+                      key={cat.id}
+                      href={getFilterUrl({ category: cat.slug })}
+                      className={`px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+                        category === cat.slug 
+                          ? "bg-accent border-accent text-white" 
+                          : "bg-canvas border-gray-300/60 text-gray-500 hover:text-ink"
+                      }`}
+                    >
+                      {cat.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* Brands Filter */}
+              <div>
+                <h4 className="font-sans font-semibold text-xs uppercase tracking-wider text-ink border-b border-gray-100 pb-2 mb-3">
+                  Brands
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    href={getFilterUrl({ brand: "" })}
+                    className={`px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+                      !brand 
+                        ? "bg-accent border-accent text-white" 
+                        : "bg-canvas border-gray-300/60 text-gray-500 hover:text-ink"
+                    }`}
+                  >
+                    All Brands
+                  </Link>
+                  {brands.map((br) => (
+                    <Link
+                      key={br.id}
+                      href={getFilterUrl({ brand: br.slug })}
+                      className={`px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+                        brand === br.slug 
+                          ? "bg-accent border-accent text-white" 
+                          : "bg-canvas border-gray-300/60 text-gray-500 hover:text-ink"
+                      }`}
+                    >
+                      {br.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sorting Filter */}
+              <div>
+                <h4 className="font-sans font-semibold text-xs uppercase tracking-wider text-ink border-b border-gray-100 pb-2 mb-3">
+                  Sort By
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    href={getFilterUrl({ sort: "" })}
+                    className={`px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+                      !sort 
+                        ? "bg-accent border-accent text-white" 
+                        : "bg-canvas border-gray-300/60 text-gray-500 hover:text-ink"
+                    }`}
+                  >
+                    Newest Arrival
+                  </Link>
+                  <Link
+                    href={getFilterUrl({ sort: "price-asc" })}
+                    className={`px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+                      sort === "price-asc" 
+                        ? "bg-accent border-accent text-white" 
+                        : "bg-canvas border-gray-300/60 text-gray-500 hover:text-ink"
+                    }`}
+                  >
+                    Price: Low to High
+                  </Link>
+                  <Link
+                    href={getFilterUrl({ sort: "price-desc" })}
+                    className={`px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+                      sort === "price-desc" 
+                        ? "bg-accent border-accent text-white" 
+                        : "bg-canvas border-gray-300/60 text-gray-500 hover:text-ink"
+                    }`}
+                  >
+                    Price: High to Low
+                  </Link>
+                </div>
+              </div>
+
+              {/* Reset button inside mobile drawer */}
+              {(category || brand || minPrice || maxPrice || sort || search) && (
+                <Link
+                  href="/products"
+                  className="text-center font-semibold text-xs bg-accent text-white py-3 rounded-full hover:bg-accent-dark transition-all w-full block mt-2"
+                >
+                  Reset all filters
+                </Link>
+              )}
+            </div>
+          </details>
+        </div>
 
         {/* PRODUCTS GRID */}
         <section className="lg:col-span-9">
