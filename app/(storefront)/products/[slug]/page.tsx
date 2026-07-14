@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { notFound } from "next/navigation";
 import ProductDetails from "@/components/storefront/product-details";
 
@@ -11,7 +12,11 @@ interface PageProps {
 
 export async function generateStaticParams() {
   try {
-    const supabase = await createClient();
+    // Query Supabase directly without the SSG cookie check context
+    const supabase = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
     const { data: products } = await supabase
       .from("products")
       .select("slug")
