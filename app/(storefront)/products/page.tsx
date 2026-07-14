@@ -16,6 +16,7 @@ interface SearchParams {
   maxPrice?: string;
   sort?: string;
   search?: string;
+  page?: string;
 }
 
 interface ProductImage {
@@ -40,11 +41,17 @@ export default async function ProductsPage(props: {
   searchParams: Promise<SearchParams>;
 }) {
   const searchParams = await props.searchParams;
-  const { category, brand, minPrice, maxPrice, sort, search } = searchParams;
+  const { category, brand, minPrice, maxPrice, sort, search, page } = searchParams;
+
+  const currentPage = page ? parseInt(page) : 1;
+  const limit = 18;
+  const from = (currentPage - 1) * limit;
+  const to = from + limit - 1;
 
   let products: Product[] = [];
   let categories: { id: string; name: string; slug: string }[] = [];
   let brands: { id: string; name: string; slug: string }[] = [];
+  let totalPages = 1;
 
   try {
     const supabase = await createClient();
@@ -68,7 +75,7 @@ export default async function ProductsPage(props: {
     // Start building query
     let query = supabase
       .from("products")
-      .select("*, product_images(*)")
+      .select("*, product_images(*)", { count: "exact" })
       .eq("status", "published");
 
     // Apply category filter
@@ -109,10 +116,14 @@ export default async function ProductsPage(props: {
       query = query.order("created_at", { ascending: false });
     }
 
-    const { data: productsData } = await query;
+    // Apply pagination range
+    query = query.range(from, to);
+
+    const { data: productsData, count } = await query;
     if (productsData) {
       products = productsData as unknown as Product[];
     }
+    totalPages = count ? Math.ceil(count / limit) : 1;
   } catch (error) {
     console.error("Error loading products catalog:", error);
   }
@@ -127,6 +138,9 @@ export default async function ProductsPage(props: {
 
   const getFilterUrl = (newParams: Partial<SearchParams>) => {
     const combined = { ...searchParams, ...newParams };
+    if (!newParams.page) {
+      delete combined.page;
+    }
     const queryParts = Object.entries(combined)
       .filter(([_, value]) => value !== undefined && value !== "")
       .map(([key, value]) => `${key}=${encodeURIComponent(value as string)}`);
@@ -495,6 +509,35 @@ export default async function ProductsPage(props: {
                 );
               })}
             </div>
+
+            {/* PAGINATION CONTROLS */}
+            {totalPages > 1 && (
+              <div className="flex justify-between items-center mt-12 pt-6 border-t border-gray-300/30 font-sans text-xs">
+                <Link
+                  href={currentPage > 1 ? getFilterUrl({ page: (currentPage - 1).toString() }) : "#"}
+                  className={`px-4 py-2 rounded-full border border-gray-300/60 font-semibold transition-all select-none ${
+                    currentPage > 1 
+                      ? "text-ink bg-paper hover:bg-canvas" 
+                      : "text-gray-400 bg-canvas cursor-not-allowed pointer-events-none"
+                  }`}
+                >
+                  ‹ Previous
+                </Link>
+                <span className="text-gray-500 font-semibold select-none">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Link
+                  href={currentPage < totalPages ? getFilterUrl({ page: (currentPage + 1).toString() }) : "#"}
+                  className={`px-4 py-2 rounded-full border border-gray-300/60 font-semibold transition-all select-none ${
+                    currentPage < totalPages 
+                      ? "text-ink bg-paper hover:bg-canvas" 
+                      : "text-gray-400 bg-canvas cursor-not-allowed pointer-events-none"
+                  }`}
+                >
+                  Next ›
+                </Link>
+              </div>
+            )}
           )}
         </section>
 
