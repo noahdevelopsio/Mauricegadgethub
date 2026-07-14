@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import Image from "next/image";
 import SignOutButton from "@/components/admin/signout-button";
-import { LayoutDashboard, ShoppingBag, FolderTree, CreditCard, ShoppingCart, Settings } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, FolderTree, CreditCard, ShoppingCart, Settings, Users } from "lucide-react";
 
 export const revalidate = 0; // Always query live session role data on layout load
 
@@ -40,6 +40,7 @@ export default async function AdminDashboardLayout({
     { label: "Categories", href: "/admin/categories", icon: <FolderTree className="w-4 h-4" /> },
     { label: "Orders", href: "/admin/orders", icon: <ShoppingCart className="w-4 h-4" /> },
     { label: "Transactions", href: "/admin/transactions", icon: <CreditCard className="w-4 h-4" /> },
+    { label: "Customers", href: "/admin/customers", icon: <Users className="w-4 h-4" /> },
     { label: "Settings", href: "/admin/settings", icon: <Settings className="w-4 h-4" /> },
   ];
 
