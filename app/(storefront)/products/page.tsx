@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import Image from "next/image";
+import { Search } from "lucide-react";
 
 interface SearchParams {
   category?: string;
@@ -129,14 +130,30 @@ export default async function ProductsPage(props: {
 
   return (
     <main className="max-w-7xl mx-auto py-16 px-6 md:px-12">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-gray-300 pb-6 mb-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-gray-300 pb-6 mb-10 gap-4">
         <div>
           <span className="text-xs uppercase font-extrabold tracking-widest text-accent font-sans">Catalog</span>
           <h1 className="text-4xl font-sans font-semibold tracking-tight text-ink mt-2">All Gadgets</h1>
         </div>
-        <p className="text-gray-500 text-sm font-sans mt-2 md:mt-0">
-          Showing {products.length} results
-        </p>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto">
+          {/* SEARCH BAR (Highly visible on all screens, especially mobile) */}
+          <form action="/products" method="GET" className="relative w-full sm:w-64">
+            {category && <input type="hidden" name="category" value={category} />}
+            {brand && <input type="hidden" name="brand" value={brand} />}
+            {sort && <input type="hidden" name="sort" value={sort} />}
+            <input
+              type="text"
+              name="search"
+              defaultValue={search || ""}
+              placeholder="Search products..."
+              className="bg-paper border border-gray-300 py-2.5 px-4 pl-10 rounded-full font-sans text-xs w-full focus:outline-none focus:ring-2 focus:ring-accent/15 focus:border-accent transition-all text-ink shadow-card"
+            />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 w-3.5 h-3.5" />
+          </form>
+          <p className="text-gray-500 text-xs font-sans select-none shrink-0 text-left sm:text-right">
+            Showing {products.length} results
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
