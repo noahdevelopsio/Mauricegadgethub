@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useCartStore } from "@/lib/store/cart";
+import { Check } from "lucide-react";
 
 interface ProductImage {
   id: string;
@@ -37,6 +39,8 @@ interface Product {
 
 export default function ProductDetails({ product }: { product: Product }) {
   const { product_images, product_variants, has_variants, specifications } = product;
+  const addItem = useCartStore((state) => state.addItem);
+  const [showToast, setShowToast] = useState(false);
 
   // Image Gallery State
   const [selectedImg, setSelectedImg] = useState<string>(
@@ -76,6 +80,29 @@ export default function ProductDetails({ product }: { product: Product }) {
   };
 
   const [quantity, setQuantity] = useState<number>(1);
+
+  const handleAddToCart = () => {
+    const itemId = matchedVariant ? `${product.id}-${matchedVariant.id}` : product.id;
+    const imageUrl = product_images.find((img) => img.is_primary)?.url || 
+                     product_images[0]?.url || 
+                     "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?q=80&w=600&auto=format&fit=crop";
+
+    addItem({
+      id: itemId,
+      product_id: product.id,
+      variant_id: matchedVariant ? matchedVariant.id : null,
+      name: matchedVariant ? `${product.name} (${matchedVariant.variant_name})` : product.name,
+      price: displayPrice,
+      image_url: imageUrl,
+      stock_quantity: currentStock,
+      quantity: quantity
+    });
+
+    setShowToast(true);
+    setTimeout(() => {
+      setShowToast(false);
+    }, 3000);
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 font-sans py-6">
@@ -228,7 +255,7 @@ export default function ProductDetails({ product }: { product: Product }) {
 
               {/* Add to Cart button */}
               <button 
-                onClick={() => alert(`Added ${quantity} ${product.name} to cart!`)}
+                onClick={handleAddToCart}
                 className="btn-primary h-12 flex items-center justify-center text-sm font-semibold flex-grow"
               >
                 Add to Cart
@@ -259,6 +286,23 @@ export default function ProductDetails({ product }: { product: Product }) {
         )}
 
       </div>
+
+      {/* Premium Success Toast Notification */}
+      {showToast && (
+        <div 
+          className="fixed bottom-6 right-6 z-50 bg-[#1d1d1f] text-[#f5f5f7] border border-white/10 p-4 rounded-2xl shadow-premium flex items-center gap-3 animate-in fade-in slide-in-from-bottom-5 duration-300 font-sans max-w-xs md:max-w-sm"
+        >
+          <div className="w-6 h-6 bg-success/20 text-success rounded-full flex items-center justify-center border border-success/30 shrink-0">
+            <Check className="w-3.5 h-3.5" />
+          </div>
+          <div className="flex flex-col gap-0.5 text-left">
+            <span className="font-bold text-xs">Added to Cart</span>
+            <span className="text-gray-400 text-[10px] truncate max-w-[200px]">
+              {quantity}x {product.name}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

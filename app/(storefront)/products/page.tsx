@@ -442,102 +442,104 @@ export default async function ProductsPage(props: {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {products.map((product) => {
-                const hasSale = product.sale_price !== null && product.sale_price < product.base_price;
-                const displayPrice = hasSale ? product.sale_price : product.base_price;
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {products.map((product) => {
+                  const hasSale = product.sale_price !== null && product.sale_price < product.base_price;
+                  const displayPrice = hasSale ? product.sale_price : product.base_price;
 
-                return (
-                  <Link
-                    key={product.id}
-                    href={`/products/${product.slug}`}
-                    className="group bg-paper rounded-2xl border border-gray-300/40 p-4 flex flex-col h-full hover:shadow-card hover:-translate-y-0.5 transition-all duration-300"
-                  >
-                    {/* Image */}
-                    <div className="relative aspect-square w-full bg-canvas/40 rounded-xl p-4 flex items-center justify-center overflow-hidden">
-                      <Image
-                        src={getProductImage(product)}
-                        alt={product.name}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 250px"
-                        className="object-contain p-4 group-hover:scale-103 transition-transform duration-500"
-                      />
+                  return (
+                    <Link
+                      key={product.id}
+                      href={`/products/${product.slug}`}
+                      className="group bg-paper rounded-2xl border border-gray-300/40 p-4 flex flex-col h-full hover:shadow-card hover:-translate-y-0.5 transition-all duration-300"
+                    >
+                      {/* Image */}
+                      <div className="relative aspect-square w-full bg-canvas/40 rounded-xl p-4 flex items-center justify-center overflow-hidden">
+                        <Image
+                          src={getProductImage(product)}
+                          alt={product.name}
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 250px"
+                          className="object-contain p-4 group-hover:scale-103 transition-transform duration-500"
+                        />
 
-                      {/* Stock indicators */}
-                      {product.stock_quantity <= 0 ? (
-                        <div className="absolute top-3 left-3 bg-neutral-900 text-white text-[9px] font-sans font-bold px-2 py-0.5 rounded-full uppercase">
-                          Out of Stock
-                        </div>
-                      ) : product.stock_quantity <= 5 ? (
-                        <div className="absolute top-3 left-3 bg-accent text-white text-[9px] font-sans font-bold px-2 py-0.5 rounded-full uppercase">
-                          Low Stock
-                        </div>
-                      ) : null}
+                        {/* Stock indicators */}
+                        {product.stock_quantity <= 0 ? (
+                          <div className="absolute top-3 left-3 bg-neutral-900 text-white text-[9px] font-sans font-bold px-2 py-0.5 rounded-full uppercase">
+                            Out of Stock
+                          </div>
+                        ) : product.stock_quantity <= 5 ? (
+                          <div className="absolute top-3 left-3 bg-accent text-white text-[9px] font-sans font-bold px-2 py-0.5 rounded-full uppercase">
+                            Low Stock
+                          </div>
+                        ) : null}
 
-                      {/* Sale Badge */}
-                      {hasSale && (
-                        <div className="absolute top-3 right-3 bg-accent text-white text-[9px] font-sans font-bold px-2 py-0.5 rounded-full uppercase">
-                          Sale
-                        </div>
-                      )}
-                    </div>
+                        {/* Sale Badge */}
+                        {hasSale && (
+                          <div className="absolute top-3 right-3 bg-accent text-white text-[9px] font-sans font-bold px-2 py-0.5 rounded-full uppercase">
+                            Sale
+                          </div>
+                        )}
+                      </div>
 
-                    {/* Meta info */}
-                    <div className="pt-4 px-1 flex flex-col flex-grow justify-between font-sans">
-                      <div>
-                        <h3 className="font-sans font-medium text-[15px] text-ink group-hover:text-accent transition-colors leading-snug">
-                          {product.name}
-                        </h3>
-                        <div className="flex gap-2 items-baseline mt-1.5">
-                          <span className="font-semibold text-[14px] text-accent">
-                            ₦{Number(displayPrice).toLocaleString("en-NG")}
-                          </span>
-                          {hasSale && (
-                            <span className="line-through text-[11px] text-gray-500 font-normal">
-                              ₦{Number(product.base_price).toLocaleString("en-NG")}
+                      {/* Meta info */}
+                      <div className="pt-4 px-1 flex flex-col flex-grow justify-between font-sans">
+                        <div>
+                          <h3 className="font-sans font-medium text-[15px] text-ink group-hover:text-accent transition-colors leading-snug">
+                            {product.name}
+                          </h3>
+                          <div className="flex gap-2 items-baseline mt-1.5">
+                            <span className="font-semibold text-[14px] text-accent">
+                              ₦{Number(displayPrice).toLocaleString("en-NG")}
                             </span>
-                          )}
+                            {hasSale && (
+                              <span className="line-through text-[11px] text-gray-500 font-normal">
+                                ₦{Number(product.base_price).toLocaleString("en-NG")}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="mt-5 pt-3 border-t border-gray-300/30 flex justify-between items-center text-xs font-semibold text-accent group-hover:text-accent-dark transition-colors">
+                          <span>View details</span>
+                          <span>›</span>
                         </div>
                       </div>
-                      
-                      <div className="mt-5 pt-3 border-t border-gray-300/30 flex justify-between items-center text-xs font-semibold text-accent group-hover:text-accent-dark transition-colors">
-                        <span>View details</span>
-                        <span>›</span>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-
-            {/* PAGINATION CONTROLS */}
-            {totalPages > 1 && (
-              <div className="flex justify-between items-center mt-12 pt-6 border-t border-gray-300/30 font-sans text-xs">
-                <Link
-                  href={currentPage > 1 ? getFilterUrl({ page: (currentPage - 1).toString() }) : "#"}
-                  className={`px-4 py-2 rounded-full border border-gray-300/60 font-semibold transition-all select-none ${
-                    currentPage > 1 
-                      ? "text-ink bg-paper hover:bg-canvas" 
-                      : "text-gray-400 bg-canvas cursor-not-allowed pointer-events-none"
-                  }`}
-                >
-                  ‹ Previous
-                </Link>
-                <span className="text-gray-500 font-semibold select-none">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <Link
-                  href={currentPage < totalPages ? getFilterUrl({ page: (currentPage + 1).toString() }) : "#"}
-                  className={`px-4 py-2 rounded-full border border-gray-300/60 font-semibold transition-all select-none ${
-                    currentPage < totalPages 
-                      ? "text-ink bg-paper hover:bg-canvas" 
-                      : "text-gray-400 bg-canvas cursor-not-allowed pointer-events-none"
-                  }`}
-                >
-                  Next ›
-                </Link>
+                    </Link>
+                  );
+                })}
               </div>
-            )}
+
+              {/* PAGINATION CONTROLS */}
+              {totalPages > 1 && (
+                <div className="flex justify-between items-center mt-12 pt-6 border-t border-gray-300/30 font-sans text-xs">
+                  <Link
+                    href={currentPage > 1 ? getFilterUrl({ page: (currentPage - 1).toString() }) : "#"}
+                    className={`px-4 py-2 rounded-full border border-gray-300/60 font-semibold transition-all select-none ${
+                      currentPage > 1 
+                        ? "text-ink bg-paper hover:bg-canvas" 
+                        : "text-gray-400 bg-canvas cursor-not-allowed pointer-events-none"
+                    }`}
+                  >
+                    ‹ Previous
+                  </Link>
+                  <span className="text-gray-500 font-semibold select-none">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <Link
+                    href={currentPage < totalPages ? getFilterUrl({ page: (currentPage + 1).toString() }) : "#"}
+                    className={`px-4 py-2 rounded-full border border-gray-300/60 font-semibold transition-all select-none ${
+                      currentPage < totalPages 
+                        ? "text-ink bg-paper hover:bg-canvas" 
+                        : "text-gray-400 bg-canvas cursor-not-allowed pointer-events-none"
+                    }`}
+                  >
+                    Next ›
+                  </Link>
+                </div>
+              )}
+            </>
           )}
         </section>
 
