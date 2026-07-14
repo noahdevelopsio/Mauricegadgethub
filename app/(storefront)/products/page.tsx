@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import Image from "next/image";
-import { Search } from "lucide-react";
+import { Search, SlidersHorizontal } from "lucide-react";
 
 interface SearchParams {
   category?: string;
@@ -274,7 +274,7 @@ export default async function ProductsPage(props: {
           <details className="group border border-gray-300/60 bg-paper rounded-2xl shadow-card overflow-hidden">
             <summary className="p-4 font-semibold text-xs uppercase tracking-wider text-ink cursor-pointer flex justify-between items-center select-none">
               <span className="flex items-center gap-2">
-                <span>⚙️</span>
+                <SlidersHorizontal className="w-3.5 h-3.5" />
                 <span>Filter & Sort Options</span>
               </span>
               <span className="text-gray-500 text-[10px] transition-transform duration-200 group-open:rotate-180">▼</span>
@@ -412,7 +412,7 @@ export default async function ProductsPage(props: {
         <section className="lg:col-span-9">
           {products.length === 0 ? (
             <div className="border border-gray-300/60 p-16 text-center bg-paper rounded-2xl flex flex-col items-center shadow-card">
-              <span className="text-4xl mb-4">🔍</span>
+              <Search className="w-10 h-10 text-gray-400 mb-4" />
               <h3 className="font-sans font-semibold text-lg text-ink mb-2">No Gadgets Found</h3>
               <p className="text-gray-500 text-sm max-w-md font-sans">
                 We couldn't find any gadgets matching your filter options. Try clearing some filters or searching for something else.

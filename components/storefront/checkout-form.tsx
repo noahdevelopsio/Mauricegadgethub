@@ -4,7 +4,7 @@ import { useCartStore } from "@/lib/store/cart";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Loader2, CreditCard } from "lucide-react";
+import { ArrowLeft, Loader2, CreditCard, ShoppingCart } from "lucide-react";
 
 interface CheckoutFormProps {
   flatDeliveryFee: number;
@@ -41,7 +41,7 @@ export default function CheckoutForm({ flatDeliveryFee, freeDeliveryThreshold }:
   if (items.length === 0) {
     return (
       <div className="max-w-md mx-auto text-center py-16 px-6 bg-paper rounded-2xl border border-gray-300/40 shadow-card">
-        <span className="text-4xl mb-4">🛒</span>
+        <ShoppingCart className="w-10 h-10 text-gray-400 mb-4 mx-auto" />
         <h2 className="text-2xl font-sans font-semibold text-ink mb-2">Your cart is empty</h2>
         <p className="text-gray-500 text-sm mb-6">You must add some items to your cart before proceeding to checkout.</p>
         <Link href="/products" className="btn-primary w-full text-xs py-3 font-semibold uppercase tracking-wider">

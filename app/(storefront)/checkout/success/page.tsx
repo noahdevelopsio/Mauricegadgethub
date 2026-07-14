@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import PaymentVerifier from "@/components/storefront/payment-verifier";
 import Link from "next/link";
-import { CheckCircle2, ArrowRight, Home } from "lucide-react";
+import { CheckCircle2, ArrowRight, Home, AlertTriangle } from "lucide-react";
 
 interface SuccessPageProps {
   searchParams: Promise<{
@@ -20,7 +20,7 @@ export default async function CheckoutSuccessPage(props: SuccessPageProps) {
   if (!txRef) {
     return (
       <main className="max-w-md mx-auto py-20 px-6 text-center font-sans">
-        <span className="text-3xl mb-4 block">⚠️</span>
+        <AlertTriangle className="w-10 h-10 text-accent mb-4 mx-auto" />
         <h2 className="text-xl font-semibold text-ink mb-2">Invalid reference</h2>
         <p className="text-gray-500 text-sm mb-6">No transaction reference was provided for verification.</p>
         <Link href="/products" className="btn-primary py-2.5 px-5 text-xs font-semibold uppercase">
@@ -50,7 +50,7 @@ export default async function CheckoutSuccessPage(props: SuccessPageProps) {
   if (!order) {
     return (
       <main className="max-w-md mx-auto py-20 px-6 text-center font-sans">
-        <span className="text-3xl mb-4 block">⚠️</span>
+        <AlertTriangle className="w-10 h-10 text-accent mb-4 mx-auto" />
         <h2 className="text-xl font-semibold text-ink mb-2">Order not found</h2>
         <p className="text-gray-500 text-sm mb-6">The order matching reference '{txRef}' could not be located in our records.</p>
         <Link href="/products" className="btn-primary py-2.5 px-5 text-xs font-semibold uppercase">

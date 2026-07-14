@@ -1,0 +1,28 @@
+# Next.js build output
+.next/
+out/
+build/
+
+# Dependency directories
+node_modules/
+
+# Local env files (sensitive data)
+.env*.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE settings
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Project Specs & Documentation (Explicitly ignored per instructions)
+docs/

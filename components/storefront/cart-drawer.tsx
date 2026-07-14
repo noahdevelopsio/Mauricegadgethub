@@ -53,7 +53,7 @@ export default function CartDrawer() {
         <div className="flex-grow overflow-y-auto p-6 flex flex-col gap-6">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 text-center">
-              <span className="text-3xl mb-3">🛒</span>
+              <ShoppingBag className="w-8 h-8 text-gray-400 mb-3 mx-auto" />
               <p className="text-gray-500 text-sm font-sans">Your shopping cart is empty.</p>
               <button
                 onClick={() => setCartOpen(false)}

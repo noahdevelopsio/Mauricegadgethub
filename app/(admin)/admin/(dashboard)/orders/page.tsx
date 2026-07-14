@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Search, Eye } from "lucide-react";
+import { Search, Eye, ShoppingCart } from "lucide-react";
 
 interface SearchParams {
   search?: string;
@@ -114,7 +114,7 @@ export default async function AdminOrdersPage(props: {
       <div className="border border-gray-300/60 bg-paper rounded-2xl overflow-hidden shadow-card">
         {orders.length === 0 ? (
           <div className="p-16 text-center flex flex-col items-center">
-            <span className="text-3xl mb-4">🛒</span>
+            <ShoppingCart className="w-8 h-8 text-gray-400 mb-4 mx-auto" />
             <h3 className="font-sans font-semibold text-base text-ink mb-1">No orders located</h3>
             <p className="text-gray-400 text-xs max-w-sm">
               We couldn't locate any orders matching your criteria.
