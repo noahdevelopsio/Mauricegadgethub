@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
+import { SlidersHorizontal, ShoppingBag } from "lucide-react";
 
 export async function generateMetadata(props: {
   params: Promise<{ slug: string }>;
@@ -41,6 +42,7 @@ export async function generateMetadata(props: {
 interface SearchParams {
   brand?: string;
   sort?: string;
+  page?: string;
 }
 
 interface ProductImage {
@@ -66,11 +68,17 @@ export default async function CategoryPage(props: {
   const params = await props.params;
   const searchParams = await props.searchParams;
   const { slug } = params;
-  const { brand, sort } = searchParams;
+  const { brand, sort, page } = searchParams;
+
+  const currentPage = page ? parseInt(page) : 1;
+  const limit = 18;
+  const from = (currentPage - 1) * limit;
+  const to = from + limit - 1;
 
   let category: { id: string; name: string; description: string } | null = null;
   let products: Product[] = [];
   let brands: { id: string; name: string; slug: string }[] = [];
+  let totalPages = 1;
 
   try {
     const supabase = await createClient();
@@ -99,7 +107,7 @@ export default async function CategoryPage(props: {
     // 3. Build product query
     let query = supabase
       .from("products")
-      .select("*, product_images(*)")
+      .select("*, product_images(*)", { count: "exact" })
       .eq("category_id", category.id)
       .eq("status", "published");
 
@@ -118,10 +126,14 @@ export default async function CategoryPage(props: {
       query = query.order("created_at", { ascending: false });
     }
 
-    const { data: productsData } = await query;
+    // Apply pagination range
+    query = query.range(from, to);
+
+    const { data: productsData, count } = await query;
     if (productsData) {
       products = productsData as unknown as Product[];
     }
+    totalPages = count ? Math.ceil(count / limit) : 1;
   } catch (error) {
     console.error("Error loading category page:", error);
     return notFound();
@@ -136,7 +148,10 @@ export default async function CategoryPage(props: {
   };
 
   const getFilterUrl = (newParams: Partial<SearchParams>) => {
-    const combined = { brand, sort, ...newParams };
+    const combined = { ...searchParams, ...newParams };
+    if (!newParams.page) {
+      delete combined.page;
+    }
     const queryParts = Object.entries(combined)
       .filter(([_, value]) => value !== undefined && value !== "")
       .map(([key, value]) => `${key}=${encodeURIComponent(value as string)}`);
@@ -156,14 +171,15 @@ export default async function CategoryPage(props: {
             {category.description || `Browse all gadgets in ${category.name}.`}
           </p>
         </div>
-        <p className="text-gray-500 text-sm font-sans mt-2 md:mt-0">
+        <p className="text-gray-500 text-xs font-sans mt-2 md:mt-0 select-none">
           Showing {products.length} results
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* SIDEBAR FILTER */}
-        <aside className="lg:col-span-3 flex flex-col gap-6 font-sans">
+        
+        {/* 1. DESKTOP FILTERS SIDEBAR (Hidden on Mobile) */}
+        <aside className="hidden lg:flex lg:col-span-3 flex-col gap-6 font-sans">
           
           {/* Brand Filter */}
           <div className="border border-gray-300/60 p-6 bg-paper rounded-2xl shadow-card">
@@ -233,14 +249,112 @@ export default async function CategoryPage(props: {
               Reset Filters
             </Link>
           )}
-
         </aside>
 
-        {/* PRODUCTS GRID */}
+        {/* 2. MOBILE COLLAPSIBLE FILTERS (Visible only on Mobile/Tablet) */}
+        <div className="lg:hidden col-span-1">
+          <details className="group border border-gray-300/60 bg-paper rounded-2xl shadow-card overflow-hidden">
+            <summary className="p-4 font-semibold text-xs uppercase tracking-wider text-ink cursor-pointer flex justify-between items-center select-none">
+              <span className="flex items-center gap-2">
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>Filter & Sort Options</span>
+              </span>
+              <span className="text-gray-500 text-[10px] transition-transform duration-200 group-open:rotate-180">▼</span>
+            </summary>
+            
+            <div className="p-6 border-t border-gray-100 flex flex-col gap-6 font-sans text-left">
+              {/* Brand Filter */}
+              <div>
+                <h4 className="font-sans font-semibold text-xs uppercase tracking-wider text-ink border-b border-gray-100 pb-2 mb-3">
+                  Filter Brand
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    href={getFilterUrl({ brand: "" })}
+                    className={`px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+                      !brand 
+                        ? "bg-accent border-accent text-white" 
+                        : "border-gray-300/60 text-gray-500 hover:text-ink"
+                    }`}
+                  >
+                    All Brands
+                  </Link>
+                  {brands.map((br) => {
+                    const isSelected = brand === br.slug;
+                    return (
+                      <Link
+                        key={br.id}
+                        href={getFilterUrl({ brand: br.slug })}
+                        className={`px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+                          isSelected 
+                            ? "bg-accent border-accent text-white" 
+                            : "border-gray-300/60 text-gray-500 hover:text-ink"
+                        }`}
+                      >
+                        {br.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Sort By */}
+              <div>
+                <h4 className="font-sans font-semibold text-xs uppercase tracking-wider text-ink border-b border-gray-100 pb-2 mb-3">
+                  Sort By
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    href={getFilterUrl({ sort: "" })}
+                    className={`px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+                      !sort 
+                        ? "bg-accent border-accent text-white" 
+                        : "bg-canvas border-gray-300/60 text-gray-500 hover:text-ink"
+                    }`}
+                  >
+                    Newest
+                  </Link>
+                  <Link
+                    href={getFilterUrl({ sort: "price-asc" })}
+                    className={`px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+                      sort === "price-asc"
+                        ? "bg-accent border-accent text-white"
+                        : "bg-canvas border-gray-300/60 text-gray-500 hover:text-ink"
+                    }`}
+                  >
+                    Price: Low to High
+                  </Link>
+                  <Link
+                    href={getFilterUrl({ sort: "price-desc" })}
+                    className={`px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+                      sort === "price-desc"
+                        ? "bg-accent border-accent text-white"
+                        : "bg-canvas border-gray-300/60 text-gray-500 hover:text-ink"
+                    }`}
+                  >
+                    Price: High to Low
+                  </Link>
+                </div>
+              </div>
+
+              {/* Reset button inside mobile drawer */}
+              {(brand || sort) && (
+                <Link
+                  href={`/category/${slug}`}
+                  className="text-center font-semibold text-xs bg-accent text-white py-3 rounded-full hover:bg-accent-dark transition-all w-full block mt-2"
+                >
+                  Reset all filters
+                </Link>
+              )}
+            </div>
+          </details>
+        </div>
+
+        {/* 3. PRODUCTS GRID */}
         <section className="lg:col-span-9">
           {products.length === 0 ? (
             <div className="border border-gray-300/60 p-16 text-center bg-paper rounded-2xl flex flex-col items-center shadow-card">
-              <span className="text-4xl mb-4">📦</span>
+              <ShoppingBag className="w-10 h-10 text-gray-400 mb-4" />
               <h3 className="font-sans font-semibold text-lg text-ink mb-2">No items here yet</h3>
               <p className="text-gray-500 text-sm max-w-md font-sans">
                 We couldn't find any published products under this category matching your filters.
@@ -250,71 +364,102 @@ export default async function CategoryPage(props: {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {products.map((product) => {
-                const hasSale = product.sale_price !== null && product.sale_price < product.base_price;
-                const displayPrice = hasSale ? product.sale_price : product.base_price;
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {products.map((product) => {
+                  const hasSale = product.sale_price !== null && product.sale_price < product.base_price;
+                  const displayPrice = hasSale ? product.sale_price : product.base_price;
 
-                return (
-                  <Link
-                    key={product.id}
-                    href={`/products/${product.slug}`}
-                    className="group bg-paper rounded-2xl border border-gray-300/40 p-4 flex flex-col h-full hover:shadow-card hover:-translate-y-0.5 transition-all duration-300"
-                  >
-                    {/* Image */}
-                    <div className="relative aspect-square w-full bg-canvas/40 rounded-xl p-4 flex items-center justify-center overflow-hidden">
-                      <Image
-                        src={getProductImage(product)}
-                        alt={product.name}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 250px"
-                        className="object-contain p-4 group-hover:scale-103 transition-transform duration-500"
-                      />
-                      
-                      {product.stock_quantity <= 0 ? (
-                        <div className="absolute top-3 left-3 bg-neutral-900 text-white text-[9px] font-sans font-bold px-2 py-0.5 rounded-full uppercase">
-                          Out of Stock
-                        </div>
-                      ) : product.stock_quantity <= 5 ? (
-                        <div className="absolute top-3 left-3 bg-accent text-white text-[9px] font-sans font-bold px-2 py-0.5 rounded-full uppercase">
-                          Low Stock
-                        </div>
-                      ) : null}
+                  return (
+                    <Link
+                      key={product.id}
+                      href={`/products/${product.slug}`}
+                      className="group bg-paper rounded-2xl border border-gray-300/40 p-4 flex flex-col h-full hover:shadow-card hover:-translate-y-0.5 transition-all duration-300"
+                    >
+                      {/* Image */}
+                      <div className="relative aspect-square w-full bg-canvas/40 rounded-xl p-4 flex items-center justify-center overflow-hidden">
+                        <Image
+                          src={getProductImage(product)}
+                          alt={product.name}
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 250px"
+                          className="object-contain p-4 group-hover:scale-103 transition-transform duration-500"
+                        />
+                        
+                        {product.stock_quantity <= 0 ? (
+                          <div className="absolute top-3 left-3 bg-neutral-900 text-white text-[9px] font-sans font-bold px-2 py-0.5 rounded-full uppercase">
+                            Out of Stock
+                          </div>
+                        ) : product.stock_quantity <= 5 ? (
+                          <div className="absolute top-3 left-3 bg-accent text-white text-[9px] font-sans font-bold px-2 py-0.5 rounded-full uppercase">
+                            Low Stock
+                          </div>
+                        ) : null}
 
-                      {hasSale && (
-                        <div className="absolute top-3 right-3 bg-accent text-white text-[9px] font-sans font-bold px-2 py-0.5 rounded-full uppercase">
-                          Sale
-                        </div>
-                      )}
-                    </div>
+                        {hasSale && (
+                          <div className="absolute top-3 right-3 bg-accent text-white text-[9px] font-sans font-bold px-2 py-0.5 rounded-full uppercase">
+                            Sale
+                          </div>
+                        )}
+                      </div>
 
-                    {/* Metadata */}
-                    <div className="pt-4 px-1 flex flex-col flex-grow justify-between font-sans">
-                      <div>
-                        <h3 className="font-sans font-medium text-[15px] text-ink group-hover:text-accent transition-colors leading-snug">
-                          {product.name}
-                        </h3>
-                        <div className="flex gap-2 items-baseline mt-1.5">
-                          <span className="font-semibold text-[14px] text-accent">
-                            ₦{Number(displayPrice).toLocaleString("en-NG")}
-                          </span>
-                          {hasSale && (
-                            <span className="line-through text-[11px] text-gray-500 font-normal">
-                              ₦{Number(product.base_price).toLocaleString("en-NG")}
+                      {/* Metadata */}
+                      <div className="pt-4 px-1 flex flex-col flex-grow justify-between font-sans">
+                        <div>
+                          <h3 className="font-sans font-medium text-[15px] text-ink group-hover:text-accent transition-colors leading-snug">
+                            {product.name}
+                          </h3>
+                          <div className="flex gap-2 items-baseline mt-1.5">
+                            <span className="font-semibold text-[14px] text-accent">
+                              ₦{Number(displayPrice).toLocaleString("en-NG")}
                             </span>
-                          )}
+                            {hasSale && (
+                              <span className="line-through text-[11px] text-gray-500 font-normal">
+                                ₦{Number(product.base_price).toLocaleString("en-NG")}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="mt-5 pt-3 border-t border-gray-300/30 flex justify-between items-center text-xs font-semibold text-accent group-hover:text-accent-dark transition-colors">
+                          <span>View details</span>
+                          <span>›</span>
                         </div>
                       </div>
+                    </Link>
+                  );
+                })}
+              </div>
 
-                      <div className="mt-5 pt-3 border-t border-gray-300/30 flex justify-between items-center text-xs font-semibold text-accent group-hover:text-accent-dark transition-colors">
-                        <span>View details</span>
-                        <span>›</span>
-                      </div>
-                    </div>
+              {/* PAGINATION CONTROLS */}
+              {totalPages > 1 && (
+                <div className="flex justify-between items-center mt-12 pt-6 border-t border-gray-300/30 font-sans text-xs">
+                  <Link
+                    href={currentPage > 1 ? getFilterUrl({ page: (currentPage - 1).toString() }) : "#"}
+                    className={`px-4 py-2 rounded-full border border-gray-300/60 font-semibold transition-all select-none ${
+                      currentPage > 1 
+                        ? "text-ink bg-paper hover:bg-canvas" 
+                        : "text-gray-400 bg-canvas cursor-not-allowed pointer-events-none"
+                    }`}
+                  >
+                    ‹ Previous
                   </Link>
-                );
-              })}
-            </div>
+                  <span className="text-gray-500 font-semibold select-none">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <Link
+                    href={currentPage < totalPages ? getFilterUrl({ page: (currentPage + 1).toString() }) : "#"}
+                    className={`px-4 py-2 rounded-full border border-gray-300/60 font-semibold transition-all select-none ${
+                      currentPage < totalPages 
+                        ? "text-ink bg-paper hover:bg-canvas" 
+                        : "text-gray-400 bg-canvas cursor-not-allowed pointer-events-none"
+                    }`}
+                  >
+                    Next ›
+                  </Link>
+                </div>
+              )}
+            </>
           )}
         </section>
       </div>
